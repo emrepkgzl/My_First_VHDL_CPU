@@ -25,8 +25,8 @@ This project is built modularly. Each directory contains the VHDL source, its co
 | **02** | `4_Bit_Adder` | A structural 4-bit adder built by chaining 4 `Full_Adder` modules. | **✅ Completed** |
 | **03** | `Counter` | A 4-bit sequential counter with asynchronous reset (learns `clk` & `rst`). | **✅ Completed** |
 | **04** | `FSM_Detector` | A "101" sequence detector. The first "brain" (FSM) of the project. | **✅ Completed** |
-| **05** | `ALU` | **(In Progress)** The Arithmetic Logic Unit, the "calculator" of the CPU. | **🚧 In Progress** |
-| **06** | `Control_Unit` | *(Planned)* The FSM "brain" that tells the ALU what to do. | **🕒 Planned** |
+| **05** | `ALU` | **(In Progress)** The Arithmetic Logic Unit, the "calculator" of the CPU. | **✅ Completed** |
+| **06** | `Control_Unit` | *(Planned)* The FSM "brain" that tells the ALU what to do. | **🚧 In Progress** |
 | **07** | `Register_File` | *(Planned)* The short-term memory (registers) for the CPU. | **🕒 Planned** |
 
 ---
@@ -52,5 +52,6 @@ This project is built modularly. Each directory contains the VHDL source, its co
 * **Files:** `sequence_detector.vhd`, `tb_sequence_detector.vhd`
 
 ### 05_ALU
-* **Purpose:** (In Progress) The Arithmetic Logic Unit. This will be the "datapath" or "calculator" of the CPU, capable of performing multiple operations (e.g., ADD, SUB, AND, OR) based on an input command.
-* **Files:** `alu.vhd`, `tb_alu.vhd`
+* **Purpose:** The Arithmetic Logic Unit (ALU), the primary "datapath" (calculator) of the CPU. It performs four operations (ADD, SUB, AND, OR) based on a 2-bit `OpCode`.
+* **Key Concept:** This module demonstrates professional **hardware reuse**. The single `four_bit_adder` component is used intelligently for *both* ADD (`A + B + 0`) and SUB (`A + (not B) + 1`) operations, saving significant hardware resources.
+* **Files:** `alu.vhd`, `tb_alu.vhd`, `alu_waveform.png`
