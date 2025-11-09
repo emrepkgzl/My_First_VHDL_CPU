@@ -25,9 +25,11 @@ This project is built modularly. Each directory contains the VHDL source, its co
 | **02** | `4_Bit_Adder` | A structural 4-bit adder built by chaining 4 `Full_Adder` modules. | **✅ Completed** |
 | **03** | `Counter` | A 4-bit sequential counter with asynchronous reset (learns `clk` & `rst`). | **✅ Completed** |
 | **04** | `FSM_Detector` | A "101" sequence detector. The first "brain" (FSM) of the project. | **✅ Completed** |
-| **05** | `ALU` | **(In Progress)** The Arithmetic Logic Unit, the "calculator" of the CPU. | **✅ Completed** |
-| **06** | `Control_Unit` | *(Planned)* The FSM "brain" that tells the ALU what to do. | **🚧 In Progress** |
-| **07** | `Register_File` | *(Planned)* The short-term memory (registers) for the CPU. | **🕒 Planned** |
+| **05** | `ALU` | The Arithmetic Logic Unit, the "calculator" of the CPU. | **✅ Completed** |
+| **06** | `Control_Unit` | The FSM "brain" that tells the ALU what to do. | **✅ Completed** |
+| **07** | `Instruction_ROM`| **(In Progress)** The Read-Only Memory that stores the program. | **🚧 In Progress** |
+| **08** | `Register_File` | *(Planned)* The short-term memory (registers) for the CPU. | **🕒 Planned** |
+| **09** | `CPU_Top` | *(Planned)* The final design, integrating all modules into a single CPU. | **🕒 Planned** |
 
 ---
 
@@ -55,3 +57,8 @@ This project is built modularly. Each directory contains the VHDL source, its co
 * **Purpose:** The Arithmetic Logic Unit (ALU), the primary "datapath" (calculator) of the CPU. It performs four operations (ADD, SUB, AND, OR) based on a 2-bit `OpCode`.
 * **Key Concept:** This module demonstrates professional **hardware reuse**. The single `four_bit_adder` component is used intelligently for *both* ADD (`A + B + 0`) and SUB (`A + (not B) + 1`) operations, saving significant hardware resources.
 * **Files:** `alu.vhd`, `tb_alu.vhd`, `alu_waveform.png`
+
+### 06_Control_Unit
+* **Purpose:** The "brain" (Controller) of the CPU. This is a Finite State Machine (FSM) that manages the core `FETCH-DECODE-EXECUTE` cycle.
+* **Key Concept:** This design applies the two-process FSM model (learned in module 04) to act as a system controller. It generates the correct output signals (like `PC_Enable`, `ROM_Enable`, `ALU_OpCode_Out`) depending on its current state (`FETCH`, `DECODE`, or `EXECUTE`).
+* **Files:** `control_unit.vhd`, `tb_control_unit.vhd`, `control_unit_waveform.png`
