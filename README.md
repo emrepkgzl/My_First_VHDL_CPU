@@ -23,13 +23,14 @@ This project is built modularly. Each directory contains the VHDL source, its co
 | :--- | :--- | :--- | :--- |
 | **01** | `Full_Adder` | A 1-bit combinational adder. The most basic "math" unit. | **✅ Completed** |
 | **02** | `4_Bit_Adder` | A structural 4-bit adder built by chaining 4 `Full_Adder` modules. | **✅ Completed** |
-| **03** | `Counter` | A 4-bit sequential counter with asynchronous reset (learns `clk` & `rst`). | **✅ Completed** |
-| **04** | `FSM_Detector` | A "101" sequence detector. The first "brain" (FSM) of the project. | **✅ Completed** |
-| **05** | `ALU` | The Arithmetic Logic Unit, the "calculator" of the CPU. | **✅ Completed** |
-| **06** | `Control_Unit` | The FSM "brain" that tells the ALU what to do. | **✅ Completed** |
-| **07** | `Instruction_ROM`| **(In Progress)** The Read-Only Memory that stores the program. | **🚧 In Progress** |
-| **08** | `Register_File` | *(Planned)* The short-term memory (registers) for the CPU. | **🕒 Planned** |
-| **09** | `CPU_Top` | *(Planned)* The final design, integrating all modules into a single CPU. | **🕒 Planned** |
+| **03** | `Counter` | A basic 4-bit counter. (Practice for sequential logic). | **✅ Completed** |
+| **04** | `FSM_Detector` | A "101" sequence detector. (Practice for FSM "controller" logic). | **✅ Completed** |
+| **05** | `ALU` | The Arithmetic Logic Unit (Datapath) of the CPU. | **✅ Completed** |
+| **06** | `Control_Unit` | The FSM "brain" that manages the Fetch-Decode-Execute cycle. | **✅ Completed** |
+| **07** | `Instruction_ROM`| The Read-Only Memory that stores the CPU's program. | **✅ Completed** |
+| **08** | `Program_Counter`| **(In Progress)** An enabled counter that acts as the CPU's PC. | **🚧 In Progress** |
+| **09** | `Register_File` | *(Planned)* The short-term memory (registers) for the CPU. | **🕒 Planned** |
+| **10** | `CPU_Top` | *(Planned)* The final design, integrating all modules into a single CPU. | **🕒 Planned** |
 
 ---
 
@@ -62,3 +63,8 @@ This project is built modularly. Each directory contains the VHDL source, its co
 * **Purpose:** The "brain" (Controller) of the CPU. This is a Finite State Machine (FSM) that manages the core `FETCH-DECODE-EXECUTE` cycle.
 * **Key Concept:** This design applies the two-process FSM model (learned in module 04) to act as a system controller. It generates the correct output signals (like `PC_Enable`, `ROM_Enable`, `ALU_OpCode_Out`) depending on its current state (`FETCH`, `DECODE`, or `EXECUTE`).
 * **Files:** `control_unit.vhd`, `tb_control_unit.vhd`, `control_unit_waveform.png`
+
+### 07_Instruction_ROM
+* **Purpose:** The Read-Only Memory (ROM) that stores the CPU's program. It acts as a "look-up table," providing the correct 2-bit instruction (`OpCode`) based on the 4-bit `Address` it receives.
+* **Key Concept:** This module implements a **synchronous ROM** (`if rising_edge(clk)`). The program itself is defined as a `constant` array (Look-Up Table), which is the standard method for creating hardware-based ROMs in an FPGA.
+* **Files:** `instruction_rom.vhd`, `tb_instruction_rom.vhd`, `instruction_rom_waveform.png`
