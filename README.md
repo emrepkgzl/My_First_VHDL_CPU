@@ -28,8 +28,8 @@ This project is built modularly. Each directory contains the VHDL source, its co
 | **05** | `ALU` | The Arithmetic Logic Unit (Datapath) of the CPU. | **✅ Completed** |
 | **06** | `Control_Unit` | The FSM "brain" that manages the Fetch-Decode-Execute cycle. | **✅ Completed** |
 | **07** | `Instruction_ROM`| The Read-Only Memory that stores the CPU's program. | **✅ Completed** |
-| **08** | `Program_Counter`| **(In Progress)** An enabled counter that acts as the CPU's PC. | **🚧 In Progress** |
-| **09** | `Register_File` | *(Planned)* The short-term memory (registers) for the CPU. | **🕒 Planned** |
+| **08** | `Program_Counter`| An "enabled" counter that acts as the CPU's PC. | **✅ Completed** |
+| **09** | `Register_File` | **(In Progress)** The short-term memory (registers) for the CPU. | **🚧 In Progress** |
 | **10** | `CPU_Top` | *(Planned)* The final design, integrating all modules into a single CPU. | **🕒 Planned** |
 
 ---
@@ -68,3 +68,8 @@ This project is built modularly. Each directory contains the VHDL source, its co
 * **Purpose:** The Read-Only Memory (ROM) that stores the CPU's program. It acts as a "look-up table," providing the correct 2-bit instruction (`OpCode`) based on the 4-bit `Address` it receives.
 * **Key Concept:** This module implements a **synchronous ROM** (`if rising_edge(clk)`). The program itself is defined as a `constant` array (Look-Up Table), which is the standard method for creating hardware-based ROMs in an FPGA.
 * **Files:** `instruction_rom.vhd`, `tb_instruction_rom.vhd`, `instruction_rom_waveform.png`
+
+### 08_Program_Counter
+* **Purpose:** A 4-bit "smart" counter that acts as the CPU's Program Counter (PC). This module is an upgrade to `03_Counter`.
+* **Key Concept:** This module introduces a **synchronous 'Enable' pin**. This is the critical link that allows the `06_Control_Unit` (brain) to control the PC (kas). The counter now only increments (`+1`) on a clock edge *if* the `Enable` pin is active ('1'). This allows the "brain" to pause the counter during the `DECODE` and `EXECUTE` states.
+* **Files:** `program_counter.vhd`, `tb_program_counter.vhd`, `program_counter_waveform.png`
