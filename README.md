@@ -29,8 +29,8 @@ This project is built modularly. Each directory contains the VHDL source, its co
 | **06** | `Control_Unit` | The FSM "brain" that manages the Fetch-Decode-Execute cycle. | **✅ Completed** |
 | **07** | `Instruction_ROM`| The Read-Only Memory that stores the CPU's program. | **✅ Completed** |
 | **08** | `Program_Counter`| An "enabled" counter that acts as the CPU's PC. | **✅ Completed** |
-| **09** | `Register_File` | **(In Progress)** The short-term memory (registers) for the CPU. | **🚧 In Progress** |
-| **10** | `CPU_Top` | *(Planned)* The final design, integrating all modules into a single CPU. | **🕒 Planned** |
+| **09** | `Register_File` | The short-term memory (registers) for the CPU. | **✅ Completed** |
+| **10** | `CPU_Top` | **(In Progress)** The final design, integrating all modules into a single CPU. | **🚧 In Progress** |
 
 ---
 
@@ -73,3 +73,10 @@ This project is built modularly. Each directory contains the VHDL source, its co
 * **Purpose:** A 4-bit "smart" counter that acts as the CPU's Program Counter (PC). This module is an upgrade to `03_Counter`.
 * **Key Concept:** This module introduces a **synchronous 'Enable' pin**. This is the critical link that allows the `06_Control_Unit` (brain) to control the PC (kas). The counter now only increments (`+1`) on a clock edge *if* the `Enable` pin is active ('1'). This allows the "brain" to pause the counter during the `DECODE` and `EXECUTE` states.
 * **Files:** `program_counter.vhd`, `tb_program_counter.vhd`, `program_counter_waveform.png`
+
+### 09_Register_File
+* **Purpose:** The CPU's short-term memory "workbench" (R0-R15). This module holds the data that the ALU operates on and stores the results.
+* **Key Concept:** This design demonstrates a professional **multi-port memory** architecture:
+    1.  **Synchronous Write:** Data is written *only* on the `rising_edge(clk)` *if* `Write_Enable = '1'`. This protects the integrity of the registers.
+    2.  **Asynchronous Read:** The two read ports (`Data_Out_A`, `Data_Out_B`) are combinational. They provide data *immediately* when the read addresses change, allowing the ALU to access data and compute a result in the same clock cycle.
+* **Files:** `register_file.vhd`, `tb_register_file.vhd`, `register_file_waveform.png`
