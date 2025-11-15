@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity program_counter is
+
 	port(
 		clk		: in std_logic;
 		rst		: in std_logic;
@@ -10,6 +11,7 @@ entity program_counter is
 		Enable	: in std_logic;
 		Q			: out	std_logic_vector(3 downto 0)
 	);
+	
 end entity program_counter;
 
 architecture bhv of program_counter is

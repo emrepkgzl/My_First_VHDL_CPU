@@ -6,6 +6,7 @@ entity instruction_rom is
 
 	port(
 		clk		: in std_logic;
+		Enable 	: in std_logic;
 		Address	: in std_logic_vector(3 downto 0);
 		
 		Data_Out	: out std_logic_vector(1 downto 0)
@@ -38,9 +39,13 @@ begin
 
 		if rising_edge(clk) then
 		
-			address_index := to_integer(unsigned(Address));
-			
-			Data_Out <= MY_PROGRAM(address_index);
+			if(Enable = '1') then
+		
+				address_index := to_integer(unsigned(Address));
+				
+				Data_Out <= MY_PROGRAM(address_index);
+				
+			end if;
 			
 		end if;
 		

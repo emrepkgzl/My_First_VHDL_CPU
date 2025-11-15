@@ -27,10 +27,11 @@ This project is built modularly. Each directory contains the VHDL source, its co
 | **04** | `FSM_Detector` | A "101" sequence detector. (Practice for FSM "controller" logic). | **✅ Completed** |
 | **05** | `ALU` | The Arithmetic Logic Unit (Datapath) of the CPU. | **✅ Completed** |
 | **06** | `Control_Unit` | The FSM "brain" that manages the Fetch-Decode-Execute cycle. | **✅ Completed** |
-| **07** | `Instruction_ROM`| The Read-Only Memory that stores the CPU's program. | **✅ Completed** |
-| **08** | `Program_Counter`| An "enabled" counter that acts as the CPU's PC. | **✅ Completed** |
-| **09** | `Register_File` | The short-term memory (registers) for the CPU. | **✅ Completed** |
-| **10** | `CPU_Top` | **(In Progress)** The final design, integrating all modules into a single CPU. | **🚧 In Progress** |
+| **07** | `Instruction_ROM`| The synchronous Read-Only Memory that stores the CPU's program. | **✅ Completed** |
+| **08** | `Program_Counter`| An "enabled" counter that acts as the CPU's Program Counter (PC). | **✅ Completed** |
+| **09** | `Register_File` | The multi-port short-term memory (registers) for the CPU. | **✅ Completed** |
+| **10** | `CPU_Top` | The final "v1.0" integration, proving the F-D-E cycle works. | **✅ Completed** |
+| **11** | `CPU_v2_Upgrade` | *(Planned)* Upgrading the CPU to support dynamic addressing and new commands. | **🕒 Planned** |
 
 ---
 
@@ -77,6 +78,30 @@ This project is built modularly. Each directory contains the VHDL source, its co
 ### 09_Register_File
 * **Purpose:** The CPU's short-term memory "workbench" (R0-R15). This module holds the data that the ALU operates on and stores the results.
 * **Key Concept:** This design demonstrates a professional **multi-port memory** architecture:
-    1.  **Synchronous Write:** Data is written *only* on the `rising_edge(clk)` *if* `Write_Enable = '1'`. This protects the integrity of the registers.
-    2.  **Asynchronous Read:** The two read ports (`Data_Out_A`, `Data_Out_B`) are combinational. They provide data *immediately* when the read addresses change, allowing the ALU to access data and compute a result in the same clock cycle.
+    1.  **Synchronous Write:** Data is written *only* on the `rising_edge(clk)` *if* `Write_Enable = '1'`.
+    2.  **Asynchronous Read:** The two read ports (`Data_Out_A`, `Data_Out_B`) are combinational, providing data *immediately* when the read addresses change.
+* **v1.0 Test Note:** For the `10_CPU_Top` integration test, the `rst` logic of this module was modified to pre-load `R1` with `5` and `R2` with `7`. This "test-hack" allowed for verification of the ALU's computation (`5+7`, `5-7`, etc.) before the CPU had a dedicated `LDI` (Load Immediate) instruction.
 * **Files:** `register_file.vhd`, `tb_register_file.vhd`, `register_file_waveform.png`
+
+### 10_CPU_Top
+* **Purpose:** The final "v1.0" design. This is the "mainboard" module that structurally integrates all other verified components (`Control_Unit`, `Program_Counter`, `Instruction_ROM`, `ALU`, `Register_File`) into a single, working processor.
+* **Key Concept:** This module is a pure **structural VHDL** design. It contains no logic, only `component` definitions, `signal` declarations (the "nervous system"), and `port map` blocks to connect all the "organs" of the CPU together.
+* **v1.0 Limitation:** This initial CPU version uses **hardwired register addressing**. The `Control_Unit` does not yet know how to tell the `Register_File` *which* registers to read/write. We "hacked" this by wiring the `Register_File` to *always* read from `R1` and `R2`, and *always* write to `R3`.
+* **Files:** `cpu_top.vhd`, `tb_cpu_top.vhd`, `cpu_top_waveform.png`
+
+---
+
+## 💡 Instruction Set Architecture (ISA) - v1.0
+
+This is the official "language" that the v1.0 CPU understands.
+
+The "v1.0" architecture uses a 2-bit `OpCode` (`1 downto 0`) provided by the `Instruction_ROM`. The register addresses are not part of the instruction and are **hardwired** in the `cpu_top` module.
+
+**All v1.0 operations are implicitly:** `R3 = R1 [Operation] R2`
+
+| OpCode (`w_rom_opcode`) | Mnemonic | Operation | Description |
+| :---: | :---: | :--- | :--- |
+| `"00"` | `ADD` | `R3 = R1 + R2` | Adds the contents of R1 and R2, stores in R3. |
+| `"01"` | `SUB` | `R3 = R1 - R2` | Subtracts R2 from R1, stores in R3. |
+| `"10"` | `AND` | `R3 = R1 and R2`| Bitwise ANDs R1 and R2, stores in R3. |
+| `"11"` | `OR` | `R3 = R1 or R2` | Bitwise ORs R1 and R2, stores in R3. |

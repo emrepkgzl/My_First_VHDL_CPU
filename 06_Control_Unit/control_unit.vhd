@@ -4,14 +4,16 @@ use ieee.std_logic_1164.all;
 entity control_unit is
 
 	port(
-			clk				:	in		std_logic;
-			rst				:	in		std_logic;
+			clk					:	in		std_logic;
+			rst					:	in		std_logic;
 
-			Instr_OpCode	:	in		std_logic_vector(1 downto 0);
-			ALU_OpCode_Out	:	out	std_logic_vector(1 downto 0);
+			Instr_OpCode		:	in		std_logic_vector(1 downto 0);
+			ALU_OpCode_Out		:	out	std_logic_vector(1 downto 0);
 			
-			PC_Enable		:	out	std_logic;
-			ROM_Enable		:	out	std_logic
+			PC_Enable			:	out	std_logic;
+			ROM_Enable			:	out	std_logic;
+			
+			Reg_Write_Enable	:	out std_logic
 		);
 
 end entity control_unit;
@@ -41,10 +43,11 @@ begin
 	process_comb	:	process(current_state, Instr_OpCode)
 	begin
 	
-		ALU_OpCode_Out <= (others => 'X');
-		PC_Enable 		<= '0';
-		ROM_Enable 		<= '0';
-		next_state		<= FETCH;
+		ALU_OpCode_Out 		<= (others => 'X');
+		PC_Enable 			<= '0';
+		ROM_Enable 			<= '0';
+		Reg_Write_Enable	<= '0';
+		next_state			<= FETCH;
 		
 		case current_state is
 		
@@ -59,6 +62,7 @@ begin
 				
 			when EXECUTE =>
 				ALU_OpCode_Out <= Instr_OpCode;
+				Reg_Write_Enable <= '1';
 				next_state <= FETCH;
 				
 		end case;
