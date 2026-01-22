@@ -6,7 +6,7 @@ entity alu is
 	port(
 		A			:	in	std_logic_vector(3 downto 0);
 		B			:	in	std_logic_vector(3 downto 0);
-		OpCode	:	in std_logic_vector(1 downto 0);
+		OpCode	:	in std_logic_vector(3 downto 0);
 		
 		Result	:	out std_logic_vector(3 downto 0)
 	);
@@ -59,27 +59,30 @@ begin
 		ALU_control_process	:	process(OpCode, B, adder_result, and_result, or_result)
 		begin
 		
-			adder_B_in <= (others => 'X');
-			adder_Cin_in <= 'X';
-			Result <= (others => 'X');
+			adder_B_in <= (others => '0');
+			adder_Cin_in <= '0';
+			Result <= (others => '0');
 			
 			case OpCode is
 			
-				when "00" =>
+				when "0000" =>
 					adder_B_in		<= B;
 					adder_Cin_in 	<= '0';
 					Result 			<= adder_result;
 					
-				when "01" => 
+				when "0001" => 
 					adder_B_in		<= not B;
 					adder_Cin_in 	<= '1';
 					Result 			<= adder_result;
 					
-				when "10" =>
+				when "0010" =>
 					Result <= and_result;
 					
-				when "11" =>
+				when "0011" =>
 					Result <= or_result;
+					
+				when "1000" =>
+					Result <= B;
 					
 				when others =>
 					adder_B_in <= (others => 'X');

@@ -24,6 +24,8 @@ architecture test of tb_cpu_top is
 	signal s_clk	: std_logic := '0';
 	signal s_rst 	: std_logic := '0';
 	
+	signal sim_done: boolean := false;
+	
 	signal s_Debug_ALU_Result : std_logic_vector(3 downto 0);
 
 begin
@@ -38,10 +40,13 @@ begin
 	clk_process	: process
 	begin
 	
-		s_clk <= '0';
-		wait for CLK_PERIOD / 2;
-		s_clk <= '1';
-		wait for CLK_PERIOD / 2;
+		while not sim_done loop
+			s_clk <= '0';
+			wait for CLK_PERIOD / 2;
+			s_clk <= '1';
+			wait for CLK_PERIOD / 2;
+		end loop;
+		wait;
 		
 	end process clk_process;
 	
@@ -54,8 +59,8 @@ begin
 		s_rst <= '0';
 		
 		--wait for execution of rom content
-		wait for 400 ns;
-		
+		wait for 450 ns;
+		sim_done <= true;
 		wait;
 		
 	end process stim_process;

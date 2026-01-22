@@ -1,6 +1,6 @@
 # My_First_VHDL_CPU
 
-A simple 4-bit CPU designed from scratch in VHDL. This repo documents my learning process, including all modules (ALU, FSM, Counter) and their verification testbenches.
+A programmable 4-bit CPU architecture designed from scratch in VHDL. This repo documents my learning process, evolving from basic logic gates to a processor featuring a 16-bit instruction width, dynamic register addressing, and immediate data loading (LDI).
 
 ## 🏁 About This Project
 
@@ -31,7 +31,8 @@ This project is built modularly. Each directory contains the VHDL source, its co
 | **08** | `Program_Counter`| An "enabled" counter that acts as the CPU's Program Counter (PC). | **✅ Completed** |
 | **09** | `Register_File` | The multi-port short-term memory (registers) for the CPU. | **✅ Completed** |
 | **10** | `CPU_Top` | The final "v1.0" integration, proving the F-D-E cycle works. | **✅ Completed** |
-| **11** | `CPU_v2_Upgrade` | *(Planned)* Upgrading the CPU to support dynamic addressing and new commands. | **🕒 Planned** |
+| **11** | `CPU_v2_Upgrade` | Upgraded 16-bit architecture with dynamic addressing and LDI support. | **✅ Completed** |
+| **12** | `Branching` | *(Planned)* Implementing conditional branches (BEQ, BNE) using ALU Zero Flag logic. | **🕒 Planned** |
 
 ---
 
@@ -91,17 +92,47 @@ This project is built modularly. Each directory contains the VHDL source, its co
 
 ---
 
-## 💡 Instruction Set Architecture (ISA) - v1.0
+## 📖 v2.0 Architectural Upgrades
 
-This is the official "language" that the v1.0 CPU understands.
+The transition from v1.0 to v2.0 introduced critical features that transformed the circuit into a truly programmable system:
 
-The "v1.0" architecture uses a 2-bit `OpCode` (`1 downto 0`) provided by the `Instruction_ROM`. The register addresses are not part of the instruction and are **hardwired** in the `cpu_top` module.
+### 1. 16-Bit Instruction Format (Instruction Slicing)
+The `Instruction_ROM` output was upgraded from 2-bit to **16-bit**. Each instruction is now sliced in the `cpu_top` module to extract control and address data dynamically:
+* **Bits [15:12]:** OpCode (Operation identifier)
+* **Bits [11:8]:** Target Register (Destination address)
+* **Bits [7:4]:** Source Register A (Read address 1)
+* **Bits [3:0]:** Source Register B or Immediate Data (Read address 2 or 4-bit constant)
 
-**All v1.0 operations are implicitly:** `R3 = R1 [Operation] R2`
+### 2. LDI (Load Immediate) Support
+The CPU can now load values directly from the code into registers. An **Internal Multiplexer (MUX)** was added to the datapath to choose between a register value (for R-type instructions) and immediate data from the ROM (for I-type instructions like `LDI`).
 
-| OpCode (`w_rom_opcode`) | Mnemonic | Operation | Description |
-| :---: | :---: | :--- | :--- |
-| `"00"` | `ADD` | `R3 = R1 + R2` | Adds the contents of R1 and R2, stores in R3. |
-| `"01"` | `SUB` | `R3 = R1 - R2` | Subtracts R2 from R1, stores in R3. |
-| `"10"` | `AND` | `R3 = R1 and R2`| Bitwise ANDs R1 and R2, stores in R3. |
-| `"11"` | `OR` | `R3 = R1 or R2` | Bitwise ORs R1 and R2, stores in R3. |
+### 3. Dynamic Register File
+The `Register_File` was updated to remove all hardcoded test values. All registers now initialize to zero upon reset, and data is loaded dynamically via the `LDI` command.
+
+---
+
+## 💡 Instruction Set Architecture (ISA) - v2.0
+
+This is the official "language" that the v2.0 CPU understands.
+
+Unlike the v1.0 limitation where register addresses were hardwired, the **v2.0 architecture** uses a fully programmable **16-bit instruction format**.
+
+* **OpCode:** 4-bits (`15 downto 12`) provided by the `Instruction_ROM`.
+* **Dynamic Addressing:** The register addresses (Target, Source A, Source B) are embedded directly within the instruction.
+* **Flexible Operations:** Operations are no longer implicit (`R3 = R1 op R2`). You can now specify *any* register as a source or destination.
+
+### Instruction Formats
+The 16-bit command structure is divided into two main types depending on the data source:
+
+```text
+-- R-Type (Register Ops): [OpCode(4)] [Target(4)] [Source A(4)] [Source B(4)]
+-- I-Type (Immediate):    [OpCode(4)] [Target(4)] [Unused(4)]   [Immediate(4)]
+```
+
+| OpCode | Mnemonic | Type | Operation | Description |
+| :---: | :---: | :---: | :--- | :--- |
+| `"0000"` | `ADD` | `R` | `Rd = Ra + Rb` | Adds contents of Ra and Rb, stores in Rd. |
+| `"0001"` | `SUB` | `R` | `Rd = Ra - Rb` | Subtracts Rb from Ra, stores in Rd. |
+| `"0010"` | `AND` | `R` | `Rd = Ra AND Rb`| Bitwise AND of Ra and Rb, stores in Rd. |
+| `"0011"` | `OR` | `R` | `Rd = Ra OR Rb` | Bitwise OR of Ra and Rb, stores in Rd. |
+| `"1000"` | `LDI` | `I` | `Rd = Imm` | Loads Immediate 4-bit value directly into Rd. |

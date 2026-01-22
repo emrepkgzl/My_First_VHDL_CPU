@@ -7,8 +7,8 @@ entity control_unit is
 			clk					:	in		std_logic;
 			rst					:	in		std_logic;
 
-			Instr_OpCode		:	in		std_logic_vector(1 downto 0);
-			ALU_OpCode_Out		:	out	std_logic_vector(1 downto 0);
+			Instr_OpCode		:	in		std_logic_vector(3 downto 0);
+			ALU_OpCode_Out		:	out	std_logic_vector(3 downto 0);
 			
 			PC_Enable			:	out	std_logic;
 			ROM_Enable			:	out	std_logic;
@@ -43,7 +43,7 @@ begin
 	process_comb	:	process(current_state, Instr_OpCode)
 	begin
 	
-		ALU_OpCode_Out 		<= (others => 'X');
+		ALU_OpCode_Out 		<= (others => '0');
 		PC_Enable 			<= '0';
 		ROM_Enable 			<= '0';
 		Reg_Write_Enable	<= '0';

@@ -13,7 +13,7 @@ architecture test of tb_instruction_rom is
 			Enable	: in std_logic;
 			Address	: in std_logic_vector(3 downto 0);
 			
-			Data_Out	: out std_logic_vector(1 downto 0)
+			Data_Out	: out std_logic_vector(15 downto 0)
 		);
 
 	end component instruction_rom;
@@ -24,7 +24,7 @@ architecture test of tb_instruction_rom is
 	signal s_Enable	: std_logic := '0';
 	signal s_Address	: std_logic_vector(3 downto 0) := (others => '0');
 	
-	signal s_Data_Out	: std_logic_vector(1 downto 0);
+	signal s_Data_Out	: std_logic_vector(15 downto 0);
 
 begin
 
@@ -39,9 +39,9 @@ begin
 	clk_process : process
 	begin
 	
-		s_clk <= '1';
-		wait for CLK_PERIOD / 2;
 		s_clk <= '0';
+		wait for CLK_PERIOD / 2;
+		s_clk <= '1';
 		wait for CLK_PERIOD / 2;
 		
 	end process clk_process;
@@ -50,20 +50,23 @@ begin
 	begin
 	
 		s_Address <= "0000";
-		s_Enable  <= '0';
-		wait for CLK_PERIOD;
-		
-		s_Address <= "0001";
 		s_Enable  <= '1';
 		wait for CLK_PERIOD;
 		
+		s_Address <= "0001";
+		wait for CLK_PERIOD;
+		
 		s_Address <= "0010";
-		s_Enable  <= '0';
 		wait for CLK_PERIOD;
 		
 		s_Address <= "0011";
 		wait for CLK_PERIOD;
 		
+		s_Address <= "0101";
+		s_Enable  <= '0';
+		wait for CLK_PERIOD;
+		
+		s_Address <= "0110";
 		s_Enable  <= '1';
 		wait for CLK_PERIOD;
 		

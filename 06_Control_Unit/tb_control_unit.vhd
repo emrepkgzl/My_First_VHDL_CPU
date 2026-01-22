@@ -12,12 +12,13 @@ architecture test of tb_control_unit is
 				clk					:	in		std_logic;
 				rst					:	in		std_logic;
 
-				Instr_OpCode		:	in		std_logic_vector(1 downto 0);
-				ALU_OpCode_Out		:	out	std_logic_vector(1 downto 0);
+				Instr_OpCode		:	in		std_logic_vector(3 downto 0);
+				ALU_OpCode_Out		:	out	std_logic_vector(3 downto 0);
 				
 				PC_Enable			:	out	std_logic;
 				ROM_Enable			:	out	std_logic;
-				Reg_Write_Enable	:	out	std_logic
+				
+				Reg_Write_Enable	:	out std_logic
 			);
 
 	end component control_unit;
@@ -26,12 +27,12 @@ architecture test of tb_control_unit is
 	
 	signal s_clk					: std_logic := '0';
 	signal s_rst					: std_logic := '0';
-	signal s_Instr_OpCode		: std_logic_vector(1 downto 0) := "00";
+	signal s_Instr_OpCode		: std_logic_vector(3 downto 0) := "0000";
 	
 	signal s_PC_Enable			: std_logic;
 	signal s_ROM_Enable			: std_logic;
 	signal s_Reg_Write_Enable	: std_logic;
-	signal s_ALU_OpCode_Out		: std_logic_vector(1 downto 0);
+	signal s_ALU_OpCode_Out		: std_logic_vector(3 downto 0);
 
 begin
 
@@ -60,7 +61,7 @@ begin
 	begin
 	
 		s_rst <= '1';
-		s_Instr_OpCode <= "00";
+		s_Instr_OpCode <= "0000";
 		wait for 30 ns;
 		
 		s_rst <= '0';
@@ -70,7 +71,7 @@ begin
 		wait for CLK_PERIOD;
 		wait for CLK_PERIOD;
 		
-		s_Instr_OpCode <= "01";
+		s_Instr_OpCode <= "1000";
 		
 		-- wait for fetch-decode-execute process
 		wait for CLK_PERIOD;

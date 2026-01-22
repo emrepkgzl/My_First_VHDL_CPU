@@ -22,7 +22,7 @@ architecture bhv of cpu_top is
 		port(
 			A			:	in	std_logic_vector(3 downto 0);
 			B			:	in	std_logic_vector(3 downto 0);
-			OpCode	:	in std_logic_vector(1 downto 0);
+			OpCode	:	in std_logic_vector(3 downto 0);
 			
 			Result	:	out std_logic_vector(3 downto 0)
 		);
@@ -35,13 +35,13 @@ architecture bhv of cpu_top is
 			clk					:	in		std_logic;
 			rst					:	in		std_logic;
 
-			Instr_OpCode		:	in		std_logic_vector(1 downto 0);
-			ALU_OpCode_Out		:	out	std_logic_vector(1 downto 0);
+			Instr_OpCode		:	in		std_logic_vector(3 downto 0);
+			ALU_OpCode_Out		:	out	std_logic_vector(3 downto 0);
 			
 			PC_Enable			:	out	std_logic;
 			ROM_Enable			:	out	std_logic;
 			
-			Reg_Write_Enable	:	out 	std_logic
+			Reg_Write_Enable	:	out std_logic
 		);
 
 	end component control_unit;
@@ -53,7 +53,7 @@ architecture bhv of cpu_top is
 			Enable 	: in std_logic;
 			Address	: in std_logic_vector(3 downto 0);
 			
-			Data_Out	: out std_logic_vector(1 downto 0)
+			Data_Out	: out std_logic_vector(15 downto 0)
 		);
 
 	end component instruction_rom;
@@ -98,14 +98,20 @@ architecture bhv of cpu_top is
 	--signals that are produced by control_unit
 	signal w_pc_enable		: std_logic;
 	signal w_rom_enable		: std_logic;
-	signal w_alu_opcode		: std_logic_vector(1 downto 0);
+	signal w_alu_opcode		: std_logic_vector(3 downto 0);
 	signal w_reg_write_en	: std_logic;
 	
 	--signal that is produced by program counter
 	signal w_pc_address		: std_logic_vector(3 downto 0);
 	
 	--signal that is produced by instruction_rom
-	signal w_rom_opcode		: std_logic_vector(1 downto 0);
+	signal w_instruction		: std_logic_vector(15 downto 0);
+	
+	--signals that are obtained by parsing w_instruction
+	signal w_opcode_from_rom	: std_logic_vector(3 downto 0);
+	signal w_addr_write		: std_logic_vector(3 downto 0);
+	signal w_addr_read_a		: std_logic_vector(3 downto 0);
+	signal w_addr_read_b		: std_logic_vector(3 downto 0);
 	
 	--signals that are produced by register_file
 	signal w_reg_out_a		: std_logic_vector(3 downto 0);
@@ -114,18 +120,24 @@ architecture bhv of cpu_top is
 	--signal that is produced by alu
 	signal w_alu_result		: std_logic_vector(3 downto 0);
 	
-	signal w_addr_read_a		: std_logic_vector(3 downto 0) := "0001";
-	signal w_addr_read_b		: std_logic_vector(3 downto 0) := "0010";
-	signal w_addr_write		: std_logic_vector(3 downto 0) := "0011";
+	signal w_alu_B_input		: std_logic_vector(3 downto 0);
 	
 begin
+
+	--parsing
+	w_opcode_from_rom	<= w_instruction(15 downto 12);
+	w_addr_write		<= w_instruction(11 downto 8);
+	w_addr_read_a		<= w_instruction(7 downto 4);
+	w_addr_read_b		<= w_instruction(3 downto 0);
+	
+	w_alu_B_input <= w_addr_read_b when (w_alu_opcode = "1000") else w_reg_out_b;
 
 	Control_Unit_Inst	: control_unit
 		
 		port map(
 			clk					=> clk_main,
 			rst					=> rst_main,
-			Instr_OpCode		=> w_rom_opcode,
+			Instr_OpCode		=> w_opcode_from_rom,
 			ALU_OpCode_Out		=> w_alu_opcode,
 			PC_Enable			=> w_pc_enable,
 			ROM_Enable			=> w_rom_enable,
@@ -147,7 +159,7 @@ begin
 			clk		=> clk_main,
 			Enable 	=> w_rom_enable,
 			Address	=> w_pc_address,
-			Data_Out	=> w_rom_opcode
+			Data_Out	=> w_instruction
 		);
 		
 	RegFile_Inst	: register_file
@@ -168,7 +180,7 @@ begin
 	
 		port map(
 			A			=> w_reg_out_a,
-			B			=> w_reg_out_b,
+			B			=> w_alu_B_input,
 			OpCode	=> w_alu_opcode,
 			Result	=> w_alu_result
 		);

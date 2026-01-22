@@ -9,24 +9,28 @@ entity instruction_rom is
 		Enable 	: in std_logic;
 		Address	: in std_logic_vector(3 downto 0);
 		
-		Data_Out	: out std_logic_vector(1 downto 0)
+		Data_Out	: out std_logic_vector(15 downto 0)
 	);
 
 end entity instruction_rom;
 
 architecture bhv of instruction_rom is
 
-	type rom_array_t is array(0 to 15) of std_logic_vector(1 downto 0);
+	type rom_array_t is array(0 to 15) of std_logic_vector(15 downto 0);
+	
+	-- R-Type:	[OpCode(4)] [Target(4)] [Source A(4)] [Source B(4)]
+	-- I-Type:	[OpCode(4)] [Target(4)] [NULL(4)]     [Immidiate Value(4)]
 	
 	constant MY_PROGRAM : rom_array_t := (
-		0 => "00",
-		1 => "01",
-		2 => "10",
-		3 => "11",
-		4 => "00",
-		5 => "01",
+		0 => "1000" & "0001" & "0000" & "0101", -- LDI R1, 5
+		1 => "1000" & "0010" & "0000" & "0111", -- LDI R2, 7
 		
-		others => "00"
+		2 => "0000" & "0011" & "0001" & "0010", -- ADD R3, R1, R2
+		3 => "0001" & "0100" & "0001" & "0010", -- SUB R4, R1, R2
+		4 => "0010" & "0101" & "0001" & "0010", -- AND R5, R1, R2
+		5 => "0011" & "0110" & "0001" & "0010", -- OR  R6, R1, R2
+		
+		others => "1111" & "0000" & "0000" & "0000" -- NOP
 	);
 
 begin
