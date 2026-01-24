@@ -8,8 +8,10 @@ entity control_unit is
 			rst					:	in		std_logic;
 
 			Instr_OpCode		:	in		std_logic_vector(3 downto 0);
+			Zero_Flag_In		:  in		std_logic;
 			ALU_OpCode_Out		:	out	std_logic_vector(3 downto 0);
 			
+			PC_Load_Enable		:	out	std_logic;
 			PC_Enable			:	out	std_logic;
 			ROM_Enable			:	out	std_logic;
 			
@@ -40,10 +42,11 @@ begin
 		
 	end process process_sync;
 	
-	process_comb	:	process(current_state, Instr_OpCode)
+	process_comb	:	process(current_state, Instr_OpCode, Zero_Flag_In)
 	begin
 	
-		ALU_OpCode_Out 		<= (others => '0');
+		ALU_OpCode_Out 	<= (others => '0');
+		PC_Load_Enable		<= '0';
 		PC_Enable 			<= '0';
 		ROM_Enable 			<= '0';
 		Reg_Write_Enable	<= '0';
@@ -61,8 +64,30 @@ begin
 				next_state <= EXECUTE;
 				
 			when EXECUTE =>
-				ALU_OpCode_Out <= Instr_OpCode;
-				Reg_Write_Enable <= '1';
+			
+				if(Instr_OpCode = "1001") then
+				
+					ALU_OpCode_Out		<= "0001"; --SUB
+					Reg_Write_Enable	<= '0';
+					
+					if(Zero_Flag_In = '1') then
+						
+						PC_Load_Enable <= '1';
+						
+					else
+					
+						PC_Load_Enable <= '0';
+						
+					end if;
+					
+				else					
+			
+					ALU_OpCode_Out <= Instr_OpCode;
+					Reg_Write_Enable <= '1';
+					PC_Load_Enable <= '0';
+					
+				end if;
+				
 				next_state <= FETCH;
 				
 		end case;

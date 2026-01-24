@@ -32,7 +32,8 @@ This project is built modularly. Each directory contains the VHDL source, its co
 | **09** | `Register_File` | The multi-port short-term memory (registers) for the CPU. | **✅ Completed** |
 | **10** | `CPU_Top` | The final "v1.0" integration, proving the F-D-E cycle works. | **✅ Completed** |
 | **11** | `CPU_v2_Upgrade` | Upgraded 16-bit architecture with dynamic addressing and LDI support. | **✅ Completed** |
-| **12** | `Branching` | *(Planned)* Implementing conditional branches (BEQ, BNE) using ALU Zero Flag logic. | **🕒 Planned** |
+| **12** | `Branching_v2.1` | Implemented Conditional Branching (BEQ) and Extended ALU Ops. | **✅ Completed** |
+| **13** | `RAM_&_ISA_Exp` | *(Planned)* Expanding the Instruction Set with Memory Access (LDR, STR) and Unconditional Jump (JMP) operations. | **🕒 Planned** |
 
 ---
 
@@ -111,15 +112,26 @@ The `Register_File` was updated to remove all hardcoded test values. All registe
 
 ---
 
-## 💡 Instruction Set Architecture (ISA) - v2.0
+## 📖 v2.1 Architectural Upgrades: Branching & Logic
 
-This is the official "language" that the v2.0 CPU understands.
+The transition to **v2.1** marks the completion of a fully Turing-complete logic system. The CPU can now make decisions based on data.
 
-Unlike the v1.0 limitation where register addresses were hardwired, the **v2.0 architecture** uses a fully programmable **16-bit instruction format**.
+### 1. Conditional Branching (BEQ)
+The CPU now supports the `BEQ` (Branch if Equal) instruction.
+* **Mechanism:**
+    1.  The ALU subtracts two registers (`Ra - Rb`).
+    2.  If the result is zero, the ALU sets `Zero_Flag = '1'`.
+    3.  The Control Unit reads the flag. If the opcode is `BEQ`, it triggers `PC_Load`.
+    4.  The Program Counter updates to the Target Address immediately, skipping code.
 
-* **OpCode:** 4-bits (`15 downto 12`) provided by the `Instruction_ROM`.
-* **Dynamic Addressing:** The register addresses (Target, Source A, Source B) are embedded directly within the instruction.
-* **Flexible Operations:** Operations are no longer implicit (`R3 = R1 op R2`). You can now specify *any* register as a source or destination.
+### 2. Expanded ISA (Instruction Set Architecture)
+XOR, NAND, SHL, SHR and BEQ instructions are now available.
+
+---
+
+## 💡 Instruction Set Architecture (ISA) - v2.1
+
+This is the official "language" that the v2.1 CPU uses.
 
 ### Instruction Formats
 The 16-bit command structure is divided into two main types depending on the data source:
@@ -127,6 +139,7 @@ The 16-bit command structure is divided into two main types depending on the dat
 ```text
 -- R-Type (Register Ops): [OpCode(4)] [Target(4)] [Source A(4)] [Source B(4)]
 -- I-Type (Immediate):    [OpCode(4)] [Target(4)] [Unused(4)]   [Immediate(4)]
+-- B-Type: [OpCode(4)] [Target/Addr(4)] [Source A(4)] [Source B(4)]
 ```
 
 | OpCode | Mnemonic | Type | Operation | Description |
@@ -135,4 +148,9 @@ The 16-bit command structure is divided into two main types depending on the dat
 | `"0001"` | `SUB` | `R` | `Rd = Ra - Rb` | Subtracts Rb from Ra, stores in Rd. |
 | `"0010"` | `AND` | `R` | `Rd = Ra AND Rb`| Bitwise AND of Ra and Rb, stores in Rd. |
 | `"0011"` | `OR` | `R` | `Rd = Ra OR Rb` | Bitwise OR of Ra and Rb, stores in Rd. |
+| `"0100"` | `XOR` | `R` | `Rd = Ra ^ Rb` | Bitwise XOR of Ra and Rb, stores in Rd. |
+| `"0101"` | `NAND` | `R` | `Rd = ~(Ra & Rb)` | Bitwise NAND of Ra and Rb, stores in Rd. |
+| `"0110"` | `SHL` | `R` | `Rd = Ra << 1` | Shift Left (Logical) of Ra, stores in Rd. |
+| `"0111"` | `SHR` | `R` | `Rd = Ra >> 1` | Shift Right (Logical) of Ra, stores in Rd. |
 | `"1000"` | `LDI` | `I` | `Rd = Imm` | Loads Immediate 4-bit value directly into Rd. |
+| `"1001"` | `BEQ` | `B` | `if(Ra==Rb) PC=Addr` | Branches to Address if Ra and Rb are Equal. |

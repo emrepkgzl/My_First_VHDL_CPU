@@ -59,7 +59,7 @@ begin
 		s_rst <= '0';
 		
 		--wait for execution of rom content
-		wait for 450 ns;
+		wait for 1200 ns;
 		sim_done <= true;
 		wait;
 		

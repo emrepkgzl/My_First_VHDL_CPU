@@ -13,8 +13,10 @@ architecture test of tb_control_unit is
 				rst					:	in		std_logic;
 
 				Instr_OpCode		:	in		std_logic_vector(3 downto 0);
+				Zero_Flag_In		:  in		std_logic;
 				ALU_OpCode_Out		:	out	std_logic_vector(3 downto 0);
 				
+				PC_Load_Enable		:	out	std_logic;
 				PC_Enable			:	out	std_logic;
 				ROM_Enable			:	out	std_logic;
 				
@@ -28,7 +30,9 @@ architecture test of tb_control_unit is
 	signal s_clk					: std_logic := '0';
 	signal s_rst					: std_logic := '0';
 	signal s_Instr_OpCode		: std_logic_vector(3 downto 0) := "0000";
+	signal s_Zero_Flag_In		: std_logic := '0';
 	
+	signal s_PC_Load_Enable		: std_logic;
 	signal s_PC_Enable			: std_logic;
 	signal s_ROM_Enable			: std_logic;
 	signal s_Reg_Write_Enable	: std_logic;
@@ -41,7 +45,9 @@ begin
 			clk					=> s_clk,
 			rst					=> s_rst,
 			Instr_OpCode		=> s_Instr_OpCode,
+			Zero_Flag_In		=> s_Zero_Flag_In,
 			ALU_OpCode_Out 	=> s_ALU_OpCode_Out,
+			PC_Load_Enable		=> s_PC_Load_Enable,
 			PC_Enable			=> s_PC_Enable,
 			ROM_Enable			=> s_ROM_Enable,
 			Reg_Write_Enable	=> s_Reg_Write_Enable
@@ -71,7 +77,24 @@ begin
 		wait for CLK_PERIOD;
 		wait for CLK_PERIOD;
 		
+		s_Instr_OpCode <= "1001";
+		s_Zero_Flag_In <= '0';
+		
+		-- wait for fetch-decode-execute process
+		wait for CLK_PERIOD;
+		wait for CLK_PERIOD;
+		wait for CLK_PERIOD;
+		
+		s_Instr_OpCode <= "1001";
+		s_Zero_Flag_In <= '1';
+		
+		-- wait for fetch-decode-execute process
+		wait for CLK_PERIOD;
+		wait for CLK_PERIOD;
+		wait for CLK_PERIOD;
+		
 		s_Instr_OpCode <= "1000";
+		s_Zero_Flag_In <= '0';
 		
 		-- wait for fetch-decode-execute process
 		wait for CLK_PERIOD;

@@ -20,11 +20,14 @@ architecture bhv of cpu_top is
 	component alu is
 
 		port(
-			A			:	in	std_logic_vector(3 downto 0);
-			B			:	in	std_logic_vector(3 downto 0);
-			OpCode	:	in std_logic_vector(3 downto 0);
+			A				:	in	std_logic_vector(3 downto 0);
+			B				:	in	std_logic_vector(3 downto 0);
+			OpCode		:	in std_logic_vector(3 downto 0);
 			
-			Result	:	out std_logic_vector(3 downto 0)
+			Result		:	out std_logic_vector(3 downto 0);
+			Zero_Flag	:	out std_logic;
+			Carry_Flag	:	out std_logic;
+			Neg_Flag		:	out std_logic
 		);
 
 	end component alu;
@@ -32,17 +35,19 @@ architecture bhv of cpu_top is
 	component control_unit is
 
 		port(
-			clk					:	in		std_logic;
-			rst					:	in		std_logic;
+				clk					:	in		std_logic;
+				rst					:	in		std_logic;
 
-			Instr_OpCode		:	in		std_logic_vector(3 downto 0);
-			ALU_OpCode_Out		:	out	std_logic_vector(3 downto 0);
-			
-			PC_Enable			:	out	std_logic;
-			ROM_Enable			:	out	std_logic;
-			
-			Reg_Write_Enable	:	out std_logic
-		);
+				Instr_OpCode		:	in		std_logic_vector(3 downto 0);
+				Zero_Flag_In		:  in		std_logic;
+				ALU_OpCode_Out		:	out	std_logic_vector(3 downto 0);
+				
+				PC_Load_Enable		:	out	std_logic;
+				PC_Enable			:	out	std_logic;
+				ROM_Enable			:	out	std_logic;
+				
+				Reg_Write_Enable	:	out std_logic
+			);
 
 	end component control_unit;
 	
@@ -61,11 +66,14 @@ architecture bhv of cpu_top is
 	component program_counter is
 	
 		port(
-			clk		: in std_logic;
-			rst		: in std_logic;
+			clk			: in std_logic;
+			rst			: in std_logic;
 			
-			Enable	: in std_logic;
-			Q			: out	std_logic_vector(3 downto 0)
+			Enable		: in std_logic;
+			Load_Enable	: in std_logic;
+			Data_In		: in std_logic_vector(3 downto 0);
+			
+			Q				: out	std_logic_vector(3 downto 0)
 		);
 		
 	end component program_counter;
@@ -97,6 +105,7 @@ architecture bhv of cpu_top is
 	
 	--signals that are produced by control_unit
 	signal w_pc_enable		: std_logic;
+	signal w_pc_load_enable	: std_logic;
 	signal w_rom_enable		: std_logic;
 	signal w_alu_opcode		: std_logic_vector(3 downto 0);
 	signal w_reg_write_en	: std_logic;
@@ -119,6 +128,9 @@ architecture bhv of cpu_top is
 	
 	--signal that is produced by alu
 	signal w_alu_result		: std_logic_vector(3 downto 0);
+	signal w_zero_flag		: std_logic;
+	signal w_carry_flag		: std_logic;
+	signal w_neg_flag			: std_logic;
 	
 	signal w_alu_B_input		: std_logic_vector(3 downto 0);
 	
@@ -138,8 +150,10 @@ begin
 			clk					=> clk_main,
 			rst					=> rst_main,
 			Instr_OpCode		=> w_opcode_from_rom,
+			Zero_Flag_In		=> w_zero_flag,
 			ALU_OpCode_Out		=> w_alu_opcode,
 			PC_Enable			=> w_pc_enable,
+			PC_Load_Enable		=> w_pc_load_enable,
 			ROM_Enable			=> w_rom_enable,
 			Reg_Write_Enable	=> w_reg_write_en
 		);
@@ -147,10 +161,12 @@ begin
 	PC_Inst	: program_counter
 	
 		port map(
-			clk		=> clk_main,
-			rst		=> rst_main,
-			Enable	=> w_pc_enable,
-			Q			=> w_pc_address
+			clk			=> clk_main,
+			rst			=> rst_main,
+			Enable		=> w_pc_enable,
+			Load_Enable	=> w_pc_load_enable,
+			Data_In		=> w_addr_write,
+			Q				=> w_pc_address
 		);
 			
 	ROM_Inst	: instruction_rom
@@ -179,10 +195,13 @@ begin
 	ALU_Inst	: alu
 	
 		port map(
-			A			=> w_reg_out_a,
-			B			=> w_alu_B_input,
-			OpCode	=> w_alu_opcode,
-			Result	=> w_alu_result
+			A				=> w_reg_out_a,
+			B				=> w_alu_B_input,
+			OpCode		=> w_alu_opcode,
+			Zero_Flag	=> w_zero_flag,
+			Carry_Flag	=> w_carry_flag,
+			Neg_Flag		=> w_neg_flag,
+			Result		=> w_alu_result
 		);
 		
 	Debug_ALU_Result <= w_alu_result;

@@ -3,15 +3,16 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity program_counter is
-
 	port(
-		clk		: in std_logic;
-		rst		: in std_logic;
+		clk			: in std_logic;
+		rst			: in std_logic;
 		
-		Enable	: in std_logic;
-		Q			: out	std_logic_vector(3 downto 0)
+		Enable		: in std_logic;
+		Load_Enable	: in std_logic;
+		Data_In		: in std_logic_vector(3 downto 0);
+		
+		Q				: out	std_logic_vector(3 downto 0)
 	);
-	
 end entity program_counter;
 
 architecture bhv of program_counter is
@@ -29,7 +30,11 @@ begin
 			
 		elsif	rising_edge(clk) then
 		
-			if(Enable = '1') then
+			if(Load_Enable = '1') then
+			
+				s_count <= Data_In;
+		
+			elsif(Enable = '1') then
 			
 				s_count <= std_logic_vector(unsigned(s_count) + 1);
 				
