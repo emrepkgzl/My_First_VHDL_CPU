@@ -46,7 +46,8 @@ architecture bhv of cpu_top is
 				PC_Enable			:	out	std_logic;
 				ROM_Enable			:	out	std_logic;
 				
-				Reg_Write_Enable	:	out std_logic
+				Reg_Write_Enable	:	out std_logic;
+				RAM_Write_Enable	:	out std_logic
 			);
 
 	end component control_unit;
@@ -103,12 +104,28 @@ architecture bhv of cpu_top is
 
 	end component register_file;
 	
+	component data_memory is
+
+		port(
+			
+			clk				: in std_logic;
+			Write_Enable	: in std_logic;
+			Address			: in std_logic_vector(3 downto 0);
+			
+			Data_In			: in std_logic_vector(3 downto 0);
+			Data_Out			: out std_logic_vector(3 downto 0)
+			
+		);
+
+	end component data_memory;
+	
 	--signals that are produced by control_unit
 	signal w_pc_enable		: std_logic;
 	signal w_pc_load_enable	: std_logic;
 	signal w_rom_enable		: std_logic;
 	signal w_alu_opcode		: std_logic_vector(3 downto 0);
 	signal w_reg_write_en	: std_logic;
+	signal w_ram_write_en	: std_logic;
 	
 	--signal that is produced by program counter
 	signal w_pc_address		: std_logic_vector(3 downto 0);
@@ -133,6 +150,8 @@ architecture bhv of cpu_top is
 	signal w_neg_flag			: std_logic;
 	
 	signal w_alu_B_input		: std_logic_vector(3 downto 0);
+	signal w_ram_data_out	: std_logic_vector(3 downto 0);
+	signal w_reg_write_data	: std_logic_vector(3 downto 0);
 	
 begin
 
@@ -142,7 +161,9 @@ begin
 	w_addr_read_a		<= w_instruction(7 downto 4);
 	w_addr_read_b		<= w_instruction(3 downto 0);
 	
-	w_alu_B_input <= w_addr_read_b when (w_alu_opcode = "1000") else w_reg_out_b;
+	--MUX
+	w_alu_B_input		<= w_addr_read_b when (w_alu_opcode = "1000") else w_reg_out_b;
+	w_reg_write_data	<= w_ram_data_out when (w_opcode_from_rom = "1100") else w_alu_result;
 
 	Control_Unit_Inst	: control_unit
 		
@@ -155,7 +176,8 @@ begin
 			PC_Enable			=> w_pc_enable,
 			PC_Load_Enable		=> w_pc_load_enable,
 			ROM_Enable			=> w_rom_enable,
-			Reg_Write_Enable	=> w_reg_write_en
+			Reg_Write_Enable	=> w_reg_write_en,
+			RAM_write_enable	=> w_ram_write_en
 		);
 		
 	PC_Inst	: program_counter
@@ -185,7 +207,7 @@ begin
 			rst				=> rst_main,
 			Write_Enable	=> w_reg_write_en,
 			Addr_Write		=> w_addr_write,
-			Data_In			=> w_alu_result,
+			Data_In			=> w_reg_write_data,
 			Addr_Read_A		=> w_addr_read_a,
 			Data_Out_A		=> w_reg_out_a,
 			Addr_Read_B		=> w_addr_read_b,
@@ -202,6 +224,18 @@ begin
 			Carry_Flag	=> w_carry_flag,
 			Neg_Flag		=> w_neg_flag,
 			Result		=> w_alu_result
+		);
+	
+	Data_Memory_Inst	: data_memory
+		
+		port map(
+			
+			clk				=> clk_main,
+			Write_Enable	=> w_ram_write_en,
+			Address			=> w_reg_out_a,
+			Data_In			=> w_reg_out_b,
+			Data_Out			=> w_ram_data_out			
+		
 		);
 		
 	Debug_ALU_Result <= w_alu_result;

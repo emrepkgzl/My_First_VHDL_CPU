@@ -15,7 +15,8 @@ entity control_unit is
 			PC_Enable			:	out	std_logic;
 			ROM_Enable			:	out	std_logic;
 			
-			Reg_Write_Enable	:	out std_logic
+			Reg_Write_Enable	:	out std_logic;
+			RAM_Write_Enable	:	out std_logic
 		);
 
 end entity control_unit;
@@ -50,6 +51,7 @@ begin
 		PC_Enable 			<= '0';
 		ROM_Enable 			<= '0';
 		Reg_Write_Enable	<= '0';
+		RAM_Write_Enable	<= '0';
 		next_state			<= FETCH;
 		
 		case current_state is
@@ -65,28 +67,45 @@ begin
 				
 			when EXECUTE =>
 			
-				if(Instr_OpCode = "1001") then
+				case Instr_OpCode is
 				
-					ALU_OpCode_Out		<= "0001"; --SUB
-					Reg_Write_Enable	<= '0';
+					when "1001" =>
 					
-					if(Zero_Flag_In = '1') then
+						ALU_OpCode_Out		<= "0001"; --SUB
+						Reg_Write_Enable	<= '0';
+						RAM_Write_Enable	<= '0';
 						
-						PC_Load_Enable <= '1';
+						if(Zero_Flag_In = '1') then
+							
+							PC_Load_Enable <= '1';
+							
+						else
 						
-					else
+							PC_Load_Enable <= '0';
+							
+						end if;
+						
+					when "1100" =>
 					
-						PC_Load_Enable <= '0';
+						ALU_OpCode_Out		<= Instr_OpCode;
+						Reg_Write_Enable	<= '1';
+						RAM_Write_Enable	<= '0';
 						
-					end if;
+					when "1101" =>
 					
-				else					
+						ALU_OpCode_Out		<= Instr_OpCode;
+						Reg_Write_Enable	<= '0';
+						RAM_Write_Enable	<= '1';
+						
+					when others =>					
 			
-					ALU_OpCode_Out <= Instr_OpCode;
-					Reg_Write_Enable <= '1';
-					PC_Load_Enable <= '0';
+						ALU_OpCode_Out 	<= Instr_OpCode;
+						Reg_Write_Enable 	<= '1';
+						RAM_Write_Enable	<= '0';
+						PC_Load_Enable		<= '0';
+						
+					end case;
 					
-				end if;
 				
 				next_state <= FETCH;
 				
